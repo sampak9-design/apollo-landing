@@ -62,7 +62,7 @@ export default function Home() {
         </div>
 
         {/* Headline */}
-        <h1 className="mb-5 max-w-4xl font-display text-3xl font-black uppercase leading-[1.05] tracking-tight sm:mb-6 sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl">
+        <h1 className="mb-5 max-w-4xl font-display text-[2.25rem] font-black uppercase leading-[1.05] tracking-tight sm:mb-6 sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl">
           <span className="block neon-text">A nova era</span>
           <span className="block bg-gradient-to-r from-apollo-cyan via-apollo-blue to-apollo-cyan bg-clip-text text-transparent">
             Inteligência Artificial
