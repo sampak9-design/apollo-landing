@@ -62,15 +62,10 @@ export default function Home() {
         </div>
 
         {/* Headline */}
-        <h1 className="mb-5 max-w-5xl font-display font-black uppercase leading-[1] tracking-tight sm:mb-6">
-          <span className="block text-xl neon-text sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl">
-            A IA que opera
-          </span>
-          <span className="my-1 block bg-gradient-to-r from-apollo-cyan via-apollo-blue to-apollo-cyan bg-clip-text text-5xl text-transparent drop-shadow-[0_0_30px_rgba(0,217,255,0.5)] sm:my-2 sm:text-7xl md:text-8xl lg:text-9xl xl:text-[10rem]">
-            por você
-          </span>
-          <span className="block text-xl neon-text sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl">
-            no mercado em tempo real
+        <h1 className="mb-5 max-w-4xl text-balance text-center font-display text-2xl font-black uppercase leading-[1.1] tracking-tight sm:mb-6 sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl">
+          <span className="block neon-text">A inteligência artificial</span>
+          <span className="block bg-gradient-to-r from-apollo-cyan via-apollo-blue to-apollo-cyan bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(0,217,255,0.5)]">
+            que opera por você
           </span>
         </h1>
 
