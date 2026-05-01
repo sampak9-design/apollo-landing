@@ -76,10 +76,14 @@ export default function Home() {
 
         {/* Subheadline */}
         <p className="mb-8 max-w-2xl text-sm leading-relaxed text-white/70 sm:mb-12 sm:text-lg md:text-xl">
-          Acesse a comunidade exclusiva da{" "}
-          <span className="font-semibold text-apollo-cyan">Apollo IA</span> no
-          Telegram e descubra como a inteligência artificial está mudando o
-          futuro — em tempo real.
+          <span className="block font-semibold text-white">
+            Sem análise complicada. Sem experiência.
+          </span>
+          <span className="mt-2 block">
+            A <span className="font-semibold text-apollo-cyan">Apollo IA</span>{" "}
+            executa as operações automaticamente enquanto você acompanha os
+            resultados.
+          </span>
         </p>
 
         {/* CTA */}
