@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --apollo-blue: #0096ff;
+  --apollo-cyan: #00d9ff;
+}
+
+html,
+body {
+  height: 100%;
+  background: #020817;
+}
+
+body {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-display {
+  font-family: var(--font-orbitron), system-ui, sans-serif;
+  letter-spacing: 0.02em;
+}
+
+/* Futuristic radial gradient overlay */
+.bg-radial-fade {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(2, 8, 23, 0.55) 0%,
+    rgba(2, 8, 23, 0.85) 60%,
+    rgba(2, 8, 23, 0.98) 100%
+  );
+}
+
+/* Animated grid background */
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(0, 217, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 217, 255, 0.08) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+/* Scanline effect */
+.scanlines::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 217, 255, 0.03) 0px,
+    rgba(0, 217, 255, 0.03) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+}
+
+/* Neon text glow */
+.neon-text {
+  text-shadow:
+    0 0 10px rgba(0, 217, 255, 0.6),
+    0 0 20px rgba(0, 150, 255, 0.4),
+    0 0 40px rgba(0, 150, 255, 0.2);
+}
+
+/* Button glow */
+.btn-glow {
+  box-shadow:
+    0 0 20px rgba(0, 150, 255, 0.5),
+    0 0 40px rgba(0, 150, 255, 0.3),
+    inset 0 0 20px rgba(0, 217, 255, 0.1);
+}
+
+.btn-glow:hover {
+  box-shadow:
+    0 0 30px rgba(0, 217, 255, 0.8),
+    0 0 60px rgba(0, 217, 255, 0.5),
+    inset 0 0 30px rgba(0, 217, 255, 0.2);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #020817;
+}
+::-webkit-scrollbar-thumb {
+  background: #0096ff;
+  border-radius: 4px;
+}
