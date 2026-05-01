@@ -63,7 +63,7 @@ export default function Home() {
 
         {/* Headline */}
         <h1 className="mb-5 max-w-4xl font-display text-2xl font-black uppercase leading-[1.1] tracking-tight sm:mb-6 sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl">
-          <span className="block neon-text">A IA que opera por você</span>
+          <span className="block neon-text">A IA que opera</span>
           <span className="block bg-gradient-to-r from-apollo-cyan via-apollo-blue to-apollo-cyan bg-clip-text text-transparent">
             no mercado em tempo real
           </span>
