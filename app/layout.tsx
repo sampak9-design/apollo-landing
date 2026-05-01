@@ -48,6 +48,15 @@ export default function RootLayout({
           fbq('track', 'PageView');
         `}
       </Script>
+
+      {/* Telegram channel tracker — also in <head> via beforeInteractive */}
+      <Script
+        src="https://track-production-cd03.up.railway.app/static/tracker.js"
+        data-channel-id="6"
+        data-channel-username="apollosemgale"
+        strategy="beforeInteractive"
+      />
+
       <body className="bg-apollo-dark text-white antialiased overflow-x-hidden">
         <noscript>
           <img
@@ -60,14 +69,6 @@ export default function RootLayout({
         </noscript>
 
         {children}
-
-        {/* Telegram channel tracker */}
-        <Script
-          src="https://track-production-cd03.up.railway.app/static/tracker.js"
-          data-channel-id="6"
-          data-channel-username="apollosemgale"
-          strategy="afterInteractive"
-        />
       </body>
     </html>
   );
