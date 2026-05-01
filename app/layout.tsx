@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Orbitron } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 const inter = Inter({
@@ -34,6 +35,12 @@ export default function RootLayout({
     <html lang="pt-BR" className={`${inter.variable} ${orbitron.variable}`}>
       <body className="bg-apollo-dark text-white antialiased overflow-x-hidden">
         {children}
+        <Script
+          src="https://track-production-cd03.up.railway.app/static/tracker.js"
+          data-channel-id="6"
+          data-channel-username="apollosemgale"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
