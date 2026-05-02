@@ -4,7 +4,7 @@ import ApolloLogo from "@/components/ApolloLogo";
 import ParticleField from "@/components/ParticleField";
 import TelegramButton from "@/components/TelegramButton";
 
-const TELEGRAM_URL = "https://t.me/apollosemgale";
+const TELEGRAM_URL = "https://t.me/+aOduebsfYdMyNjkx";
 
 export default function Home() {
   return (
