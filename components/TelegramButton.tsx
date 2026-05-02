@@ -1,23 +1,16 @@
 "use client";
 
-import { motion } from "framer-motion";
-
 type Props = {
   href: string;
 };
 
 export default function TelegramButton({ href }: Props) {
   return (
-    <motion.a
+    <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.6, duration: 0.6 }}
-      whileHover={{ scale: 1.04 }}
-      whileTap={{ scale: 0.97 }}
-      className="group relative inline-flex w-full max-w-sm items-center justify-center gap-2 overflow-hidden rounded-full border border-apollo-cyan/40 bg-gradient-to-r from-apollo-blue to-apollo-cyan px-6 py-4 font-display text-sm font-bold uppercase tracking-wider text-white btn-glow transition-all duration-300 animate-glow sm:w-auto sm:gap-3 sm:px-10 sm:py-5 sm:text-lg"
+      className="group relative inline-flex w-full max-w-sm items-center justify-center gap-2 overflow-hidden rounded-full border border-apollo-cyan/40 bg-gradient-to-r from-apollo-blue to-apollo-cyan px-6 py-4 font-display text-sm font-bold uppercase tracking-wider text-white btn-glow transition-all duration-300 hover:scale-105 active:scale-95 sm:w-auto sm:gap-3 sm:px-10 sm:py-5 sm:text-lg"
     >
       {/* Animated shine */}
       <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-1000 group-hover:translate-x-full" />
@@ -44,6 +37,6 @@ export default function TelegramButton({ href }: Props) {
       >
         <path d="M5 12h14M13 5l7 7-7 7" />
       </svg>
-    </motion.a>
+    </a>
   );
 }
