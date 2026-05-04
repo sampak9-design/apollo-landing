@@ -33,7 +33,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" className={`${inter.variable} ${orbitron.variable}`}>
-      {/* Meta Pixel — injected into <head> via beforeInteractive */}
+      {/* Meta Pixels — injected into <head> via beforeInteractive */}
       <Script id="meta-pixel" strategy="beforeInteractive">
         {`
           !function(f,b,e,v,n,t,s)
@@ -45,6 +45,7 @@ export default function RootLayout({
           s.parentNode.insertBefore(t,s)}(window, document,'script',
           'https://connect.facebook.net/en_US/fbevents.js');
           fbq('init', '2816366292049995');
+          fbq('init', '578489632017568');
           fbq('track', 'PageView');
         `}
       </Script>
@@ -64,6 +65,13 @@ export default function RootLayout({
             width="1"
             style={{ display: "none" }}
             src="https://www.facebook.com/tr?id=2816366292049995&ev=PageView&noscript=1"
+            alt=""
+          />
+          <img
+            height="1"
+            width="1"
+            style={{ display: "none" }}
+            src="https://www.facebook.com/tr?id=578489632017568&ev=PageView&noscript=1"
             alt=""
           />
         </noscript>
