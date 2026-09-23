@@ -8,6 +8,7 @@ import Countdown from "./Countdown";
 import { track } from "@/lib/tracking";
 import {
   FREE_LICENSES,
+  LICENSE_WINDOW_MINUTES,
   OFFER_DEADLINE,
   SIMULATION as SIM,
   TELEGRAM_URL,
@@ -429,7 +430,33 @@ function Result({ onSkip }: { onSkip: () => void }) {
   );
 }
 
+const DEADLINE_KEY = "apollo_license_deadline";
+
+// Prazo do visitante: data do ambiente, se existir; senão a janela a partir
+// do primeiro desbloqueio, salva no navegador para não reiniciar ao recarregar.
+function useLicenseDeadline() {
+  const [deadline, setDeadline] = useState<number | null>(OFFER_DEADLINE);
+
+  useEffect(() => {
+    if (OFFER_DEADLINE) return;
+    let value = NaN;
+    try {
+      value = Number(localStorage.getItem(DEADLINE_KEY));
+    } catch {}
+    if (!Number.isFinite(value) || value <= 0) {
+      value = Date.now() + LICENSE_WINDOW_MINUTES * 60_000;
+      try {
+        localStorage.setItem(DEADLINE_KEY, String(value));
+      } catch {}
+    }
+    setDeadline(value);
+  }, []);
+
+  return deadline;
+}
+
 function Unlocked() {
+  const deadline = useLicenseDeadline();
   const title = FREE_LICENSES
     ? `${FREE_LICENSES} licenças gratuitas da Apollo IA`
     : "Licença gratuita da Apollo IA";
@@ -461,9 +488,9 @@ function Unlocked() {
         Você concluiu sua primeira operação e desbloqueou uma licença gratuita da Apollo IA.
       </p>
 
-      {OFFER_DEADLINE && (
+      {deadline && (
         <div className="mt-7">
-          <Countdown deadline={OFFER_DEADLINE} />
+          <Countdown deadline={deadline} />
         </div>
       )}
 

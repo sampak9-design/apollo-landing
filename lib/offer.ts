@@ -14,6 +14,9 @@ export const OFFER_DEADLINE: number | null = Number.isFinite(deadline)
   ? deadline
   : null;
 
+// Sem data definida, cada visitante tem esta janela a partir do desbloqueio.
+export const LICENSE_WINDOW_MINUTES = 10;
+
 export const SIMULATION = {
   asset: "EUR/USD",
   assetName: "Euro / Dólar",

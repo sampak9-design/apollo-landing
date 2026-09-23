@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-// Conta até uma data real (OFFER_DEADLINE), igual para todos os visitantes.
-// Não reinicia ao recarregar a página.
+// Conta até o prazo recebido. Quem define o prazo é useLicenseDeadline.
 export default function Countdown({ deadline }: { deadline: number }) {
   const [now, setNow] = useState<number | null>(null);
 
