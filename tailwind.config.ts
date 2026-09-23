@@ -31,6 +31,10 @@ const config: Config = {
           "0%": { boxShadow: "0 0 20px rgba(0, 150, 255, 0.5), 0 0 40px rgba(0, 150, 255, 0.3)" },
           "100%": { boxShadow: "0 0 30px rgba(0, 217, 255, 0.8), 0 0 60px rgba(0, 217, 255, 0.5)" },
         },
+        shine: {
+          "0%": { transform: "translateX(-100%)" },
+          "60%, 100%": { transform: "translateX(100%)" },
+        },
         "grid-move": {
           "0%": { backgroundPosition: "0 0" },
           "100%": { backgroundPosition: "50px 50px" },
