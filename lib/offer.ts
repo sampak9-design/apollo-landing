@@ -2,7 +2,14 @@
 // Quantidade de licenças e prazo só aparecem na página se estiverem
 // definidos no ambiente — sem valor configurado, nada de escassez.
 
-export const TELEGRAM_URL = "https://t.me/+vWYX93dvUA5hYjgx";
+const TELEGRAM_URL = "https://t.me/+vWYX93dvUA5hYjgx";
+
+// Link do Telegram por idioma. Sem NEXT_PUBLIC_TELEGRAM_URL_ES, o México
+// usa o mesmo canal.
+export const TELEGRAM_URLS = {
+  pt: TELEGRAM_URL,
+  es: process.env.NEXT_PUBLIC_TELEGRAM_URL_ES || TELEGRAM_URL,
+};
 
 const licenses = Number(process.env.NEXT_PUBLIC_FREE_LICENSES);
 export const FREE_LICENSES: number | null =
@@ -29,6 +36,3 @@ export const SIMULATION = {
   operateMs: 5000,
   resultMs: 4200,
 };
-
-export const brl = (value: number) =>
-  value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });

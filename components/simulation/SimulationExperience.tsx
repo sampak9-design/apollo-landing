@@ -5,14 +5,16 @@ import { AnimatePresence, MotionConfig, animate, motion } from "framer-motion";
 import ApolloLogo from "@/components/ApolloLogo";
 import PriceChart from "./PriceChart";
 import Countdown from "./Countdown";
-import { track } from "@/lib/tracking";
+import { setTrackingParams, track } from "@/lib/tracking";
+import { funnelStep, startFunnel } from "@/lib/funnel";
+import { I18nContext, makeI18n, useI18n } from "@/lib/i18n";
+import { LANGS, type Lang } from "@/lib/langs";
 import {
   FREE_LICENSES,
   LICENSE_WINDOW_MINUTES,
   OFFER_DEADLINE,
   SIMULATION as SIM,
-  TELEGRAM_URL,
-  brl,
+  TELEGRAM_URLS,
 } from "@/lib/offer";
 
 type Phase = "idle" | "analyzing" | "operating" | "result" | "unlocked";
@@ -33,7 +35,17 @@ const panel = {
   transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] },
 };
 
-export default function SimulationExperience() {
+// O idioma vem da rota: / e /pt em português, /mx em espanhol.
+export default function SimulationExperience({ lang }: { lang: Lang }) {
+  useEffect(() => {
+    document.documentElement.lang = LANGS.find((l) => l.id === lang)!.htmlLang;
+    setTrackingParams({ lang });
+    startFunnel(lang);
+  }, [lang]);
+
+  const i18n = makeI18n(lang);
+  const { t, money } = i18n;
+
   const [phase, setPhase] = useState<Phase>("idle");
   const [side, setSide] = useState<Side | null>(null);
   const [price, setPrice] = useState(SIM.basePrice);
@@ -103,6 +115,7 @@ export default function SimulationExperience() {
         setPhase("operating");
       }, SIM.analyzeMs);
     } else if (phase === "operating") {
+      funnelStep("entrada");
       play("entry");
       timer = setTimeout(() => setPhase("result"), SIM.operateMs);
     } else if (phase === "result") {
@@ -121,135 +134,139 @@ export default function SimulationExperience() {
   const change = ((price - SIM.basePrice) / SIM.basePrice) * 100;
 
   return (
-    <MotionConfig reducedMotion="user">
-      <main className="relative min-h-[100dvh] w-full overflow-hidden bg-apollo-dark">
-        <div className="pointer-events-none absolute inset-0 bg-grid opacity-20" />
-        <div className="pointer-events-none absolute -top-40 left-1/2 h-80 w-[36rem] -translate-x-1/2 rounded-full bg-apollo-blue/20 blur-3xl" />
+    <I18nContext.Provider value={i18n}>
+      <MotionConfig reducedMotion="user">
+        <main className="relative min-h-[100dvh] w-full overflow-hidden bg-apollo-dark">
+          <div className="pointer-events-none absolute inset-0 bg-grid opacity-20" />
+          <div className="pointer-events-none absolute -top-40 left-1/2 h-80 w-[36rem] -translate-x-1/2 rounded-full bg-apollo-blue/20 blur-3xl" />
 
-        <div className="relative z-10 mx-auto flex min-h-[100dvh] w-full max-w-md flex-col px-4 pb-6 pt-4">
-          <header className="flex items-center justify-between">
-            <ApolloLogo className="[&_span]:text-xl [&_svg]:h-8 [&_svg]:w-8" />
-            <div className="flex items-center gap-4">
-              <button
-                onClick={toggleMuted}
-                aria-label={muted ? "Ativar som" : "Desativar som"}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 text-white/50 transition hover:text-white"
-              >
-                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M11 5 6 9H2v6h4l5 4V5z" />
-                  {muted ? <path d="m23 9-6 6M17 9l6 6" /> : <path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14" />}
-                </svg>
-              </button>
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 animate-pulse rounded-full bg-green-400" />
-                <span className="text-[10px] font-medium uppercase tracking-widest text-green-400 sm:text-xs">
-                  Online
-                </span>
+          <div className="relative z-10 mx-auto flex min-h-[100dvh] w-full max-w-md flex-col px-4 pb-6 pt-4">
+            <header className="flex items-center justify-between">
+              <ApolloLogo className="[&_span]:text-xl [&_svg]:h-8 [&_svg]:w-8" />
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={toggleMuted}
+                data-funil="botao_som"
+                  aria-label={muted ? t.soundOn : t.soundOff}
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 text-white/50 transition hover:text-white"
+                >
+                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M11 5 6 9H2v6h4l5 4V5z" />
+                    {muted ? <path d="m23 9-6 6M17 9l6 6" /> : <path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14" />}
+                  </svg>
+                </button>
+                <div className="flex items-center gap-2">
+                  <span className="h-2 w-2 animate-pulse rounded-full bg-green-400" />
+                  <span className="text-[10px] font-medium uppercase tracking-widest text-green-400 sm:text-xs">
+                    Online
+                  </span>
+                </div>
               </div>
-            </div>
-          </header>
+            </header>
 
-          <AnimatePresence mode="wait">
-            {phase === "unlocked" ? (
-              <Unlocked key="unlocked" />
-            ) : (
-              <motion.section key="terminal" {...panel} className="mt-5 flex flex-1 flex-col">
-                {phase === "idle" && (
-                  <div className="mb-4 mt-6 flex flex-col items-center text-center">
-                    <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-apollo-cyan/30 bg-apollo-cyan/5 px-3 py-1.5 backdrop-blur-sm">
-                      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-apollo-cyan" />
-                      <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-apollo-cyan">
-                        Inteligência Artificial · 2026
-                      </span>
+            <AnimatePresence mode="wait">
+              {phase === "unlocked" ? (
+                <Unlocked key="unlocked" />
+              ) : (
+                <motion.section key="terminal" {...panel} className="mt-5 flex flex-1 flex-col">
+                  {phase === "idle" && (
+                    <div className="mb-4 mt-6 flex flex-col items-center text-center">
+                      <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-apollo-cyan/30 bg-apollo-cyan/5 px-3 py-1.5 backdrop-blur-sm">
+                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-apollo-cyan" />
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-apollo-cyan">
+                          {t.tag}
+                        </span>
+                      </div>
+
+                      <h1 className="mb-3 text-balance font-display text-2xl font-black uppercase leading-[1.1] tracking-tight sm:text-3xl">
+                        <span className="block neon-text">{t.headline1}</span>
+                        <span className="block bg-gradient-to-r from-apollo-cyan via-apollo-blue to-apollo-cyan bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(0,217,255,0.5)]">
+                          {t.headline2}
+                        </span>
+                      </h1>
+
+                      <p className="text-sm text-white/70">
+                        {t.subtitle[0]} <span className="font-semibold text-white">{t.subtitle[1]}</span>{" "}
+                        {t.subtitle[2]} <span className="font-semibold text-apollo-cyan">Apollo IA</span> {t.subtitle[3]}
+                      </p>
                     </div>
+                  )}
 
-                    <h1 className="mb-3 text-balance font-display text-2xl font-black uppercase leading-[1.1] tracking-tight sm:text-3xl">
-                      <span className="block neon-text">A inteligência artificial</span>
-                      <span className="block bg-gradient-to-r from-apollo-cyan via-apollo-blue to-apollo-cyan bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(0,217,255,0.5)]">
-                        que opera por você
-                      </span>
-                    </h1>
-
-                    <p className="text-sm text-white/70">
-                      Faça uma <span className="font-semibold text-white">operação</span> e
-                      veja a <span className="font-semibold text-apollo-cyan">Apollo IA</span> em ação.
-                    </p>
-                  </div>
-                )}
-
-                {/* Terminal */}
-                <div className="overflow-hidden rounded-2xl border border-apollo-cyan/15 bg-apollo-panel/80 shadow-[0_0_40px_rgba(0,150,255,0.12)] backdrop-blur">
-                  <div className="flex items-center justify-between px-4 pt-4">
-                    <div className="flex items-center gap-2.5">
-                      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-apollo-blue/15 text-base font-bold text-apollo-cyan">
-                        {SIM.assetIcon}
-                      </span>
-                      <div>
-                        <p className="text-sm font-semibold text-white">{SIM.asset}</p>
-                        <p className="text-[11px] text-white/40">{SIM.assetName} · 1 min</p>
+                  {/* Terminal */}
+                  <div className="overflow-hidden rounded-2xl border border-apollo-cyan/15 bg-apollo-panel/80 shadow-[0_0_40px_rgba(0,150,255,0.12)] backdrop-blur">
+                    <div className="flex items-center justify-between px-4 pt-4">
+                      <div className="flex items-center gap-2.5">
+                        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-apollo-blue/15 text-base font-bold text-apollo-cyan">
+                          {SIM.assetIcon}
+                        </span>
+                        <div>
+                          <p className="text-sm font-semibold text-white">{SIM.asset}</p>
+                          <p className="text-[11px] text-white/40">{SIM.assetName} · 1 min</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-display text-sm font-bold tabular-nums text-white">
+                          {price.toFixed(SIM.priceDecimals)}
+                        </p>
+                        <p className={`text-[11px] font-semibold tabular-nums ${change >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                          {change >= 0 ? "+" : ""}
+                          {change.toFixed(2)}%
+                        </p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-display text-sm font-bold tabular-nums text-white">
-                        {price.toFixed(SIM.priceDecimals)}
-                      </p>
-                      <p className={`text-[11px] font-semibold tabular-nums ${change >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
-                        {change >= 0 ? "+" : ""}
-                        {change.toFixed(2)}%
-                      </p>
+
+                    <StatusBar phase={phase} side={side} />
+
+                    <div className="h-48 sm:h-56">
+                      <PriceChart
+                        basePrice={SIM.basePrice}
+                        trend={trend}
+                        entry={entry}
+                        side={side}
+                        entryLabel={money(SIM.startBalance)}
+                        decimals={SIM.priceDecimals}
+                        onTick={onTick}
+                      />
                     </div>
+
+                    <BalanceRow phase={phase} />
                   </div>
 
-                  <StatusBar phase={phase} side={side} />
-
-                  <div className="h-48 sm:h-56">
-                    <PriceChart
-                      basePrice={SIM.basePrice}
-                      trend={trend}
-                      entry={entry}
-                      side={side}
-                      entryLabel={brl(SIM.startBalance)}
-                      decimals={SIM.priceDecimals}
-                      onTick={onTick}
-                    />
+                  {/* Painel de ação */}
+                  <div className="mt-4 flex-1">
+                    <AnimatePresence mode="wait">
+                      {phase === "idle" && <StartButton key="idle" onStart={start} />}
+                      {phase === "analyzing" && side && <Analyzing key="analyzing" side={side} />}
+                      {phase === "operating" && side && <Operating key="operating" side={side} />}
+                      {phase === "result" && <Result key="result" onSkip={() => setPhase("unlocked")} />}
+                    </AnimatePresence>
                   </div>
+                </motion.section>
+              )}
+            </AnimatePresence>
 
-                  <BalanceRow phase={phase} />
-                </div>
-
-                {/* Painel de ação */}
-                <div className="mt-4 flex-1">
-                  <AnimatePresence mode="wait">
-                    {phase === "idle" && <StartButton key="idle" onStart={start} />}
-                    {phase === "analyzing" && side && <Analyzing key="analyzing" side={side} />}
-                    {phase === "operating" && side && <Operating key="operating" side={side} />}
-                    {phase === "result" && <Result key="result" onSkip={() => setPhase("unlocked")} />}
-                  </AnimatePresence>
-                </div>
-              </motion.section>
-            )}
-          </AnimatePresence>
-
-          <footer className="mt-6 text-center">
-            <p className="text-[10px] uppercase tracking-widest text-white/30 sm:text-xs">
-              © {new Date().getFullYear()} Apollo IA · Todos os direitos reservados
-            </p>
-          </footer>
-        </div>
-      </main>
-    </MotionConfig>
+            <footer className="mt-6 text-center">
+              <p className="text-[10px] uppercase tracking-widest text-white/30 sm:text-xs">
+                © {new Date().getFullYear()} Apollo IA · {t.rights}
+              </p>
+            </footer>
+          </div>
+        </main>
+      </MotionConfig>
+    </I18nContext.Provider>
   );
 }
 
 function StatusBar({ phase, side }: { phase: Phase; side: Side | null }) {
+  const { t } = useI18n();
   const text =
     phase === "idle"
-      ? "Apollo IA monitorando o mercado"
+      ? t.statusIdle
       : phase === "analyzing"
-        ? "Analisando o mercado…"
+        ? t.statusAnalyzing
         : phase === "operating"
-          ? `Operação de ${side === "buy" ? "compra" : "venda"} em andamento`
-          : "Operação finalizada";
+          ? t.statusOperating(side === "buy")
+          : t.statusDone;
   const active = phase === "analyzing" || phase === "operating";
 
   return (
@@ -261,6 +278,7 @@ function StatusBar({ phase, side }: { phase: Phase; side: Side | null }) {
 }
 
 function BalanceRow({ phase }: { phase: Phase }) {
+  const { t, money } = useI18n();
   const [value, setValue] = useState(SIM.startBalance);
 
   useEffect(() => {
@@ -276,19 +294,21 @@ function BalanceRow({ phase }: { phase: Phase }) {
 
   return (
     <div className="flex items-center justify-between border-t border-white/5 bg-black/20 px-4 py-3">
-      <span className="text-[11px] uppercase tracking-widest text-white/40">Saldo</span>
+      <span className="text-[11px] uppercase tracking-widest text-white/40">{t.balance}</span>
       <span className={`font-display text-base font-bold tabular-nums ${value > SIM.startBalance ? "text-emerald-400" : "text-white"}`}>
-        {brl(value)}
+        {money(value)}
       </span>
     </div>
   );
 }
 
 function StartButton({ onStart }: { onStart: () => void }) {
+  const { t, money } = useI18n();
   return (
     <motion.div {...panel}>
       <button
         onClick={onStart}
+        data-funil="botao_iniciar"
         className="group relative flex h-16 w-full items-center justify-center gap-3 overflow-hidden rounded-2xl border border-apollo-cyan/40 bg-gradient-to-r from-apollo-blue to-apollo-cyan font-display text-sm font-bold uppercase tracking-wider text-white btn-glow transition active:scale-95 sm:text-base"
       >
         <span className="absolute inset-0 -translate-x-full animate-[shine_2.8s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/25 to-transparent" />
@@ -296,24 +316,25 @@ function StartButton({ onStart }: { onStart: () => void }) {
           <path d="M12 3v2M12 19v2M5 12H3M21 12h-2M7.8 7.8 6.3 6.3M17.7 17.7l-1.5-1.5M7.8 16.2l-1.5 1.5M17.7 6.3l-1.5 1.5" />
           <circle cx="12" cy="12" r="3.5" />
         </svg>
-        <span className="relative">Iniciar operação com a IA</span>
+        <span className="relative">{t.start}</span>
       </button>
       <p className="mt-3 text-center text-[11px] text-white/40">
-        A Apollo IA analisa o gráfico e decide a entrada · {brl(SIM.startBalance)}
+        {t.startCaption} · {money(SIM.startBalance)}
       </p>
     </motion.div>
   );
 }
 
-const ANALYSIS_STEPS = ["Lendo volume e liquidez", "Identificando tendência", "Definindo direção da entrada"];
+const ANALYSIS_STEP_COUNT = 3;
 
 function Analyzing({ side }: { side: Side }) {
+  const { t } = useI18n();
   const [done, setDone] = useState(0);
 
   useEffect(() => {
     // Reserva ~1,3s no fim para o sinal ficar visível antes de entrar
-    const step = (SIM.analyzeMs - 1300) / ANALYSIS_STEPS.length;
-    const id = setInterval(() => setDone((d) => Math.min(d + 1, ANALYSIS_STEPS.length)), step);
+    const step = (SIM.analyzeMs - 1300) / ANALYSIS_STEP_COUNT;
+    const id = setInterval(() => setDone((d) => Math.min(d + 1, ANALYSIS_STEP_COUNT)), step);
     return () => clearInterval(id);
   }, []);
 
@@ -324,11 +345,11 @@ function Analyzing({ side }: { side: Side }) {
           <span className="absolute inset-0 animate-spin rounded-full border-2 border-apollo-cyan/20 border-t-apollo-cyan" />
           <span className="h-2 w-2 rounded-full bg-apollo-cyan" />
         </span>
-        <p className="font-display text-sm font-semibold text-white">Apollo IA analisando o mercado…</p>
+        <p className="font-display text-sm font-semibold text-white">{t.analyzingTitle}</p>
       </div>
       <ul className="space-y-2">
-        {ANALYSIS_STEPS.map((label, i) => (
-          <li key={label} className={`flex items-center gap-2 text-xs transition-colors duration-300 ${i < done ? "text-white/80" : "text-white/30"}`}>
+        {t.steps.map((label, i) => (
+          <li key={i} className={`flex items-center gap-2 text-xs transition-colors duration-300 ${i < done ? "text-white/80" : "text-white/30"}`}>
             <span className={`flex h-4 w-4 items-center justify-center rounded-full text-[9px] ${i < done ? "bg-apollo-cyan text-apollo-dark" : "border border-white/20"}`}>
               {i < done ? "✓" : ""}
             </span>
@@ -337,15 +358,15 @@ function Analyzing({ side }: { side: Side }) {
         ))}
       </ul>
       <AnimatePresence>
-        {done >= ANALYSIS_STEPS.length && (
+        {done >= ANALYSIS_STEP_COUNT && (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             className={`mt-4 flex items-center justify-between rounded-xl border px-3 py-2.5 ${side === "buy" ? "border-emerald-400/30 bg-emerald-400/10" : "border-rose-400/30 bg-rose-400/10"}`}
           >
-            <span className="text-[11px] font-semibold uppercase tracking-widest text-white/60">Sinal identificado</span>
+            <span className="text-[11px] font-semibold uppercase tracking-widest text-white/60">{t.signal}</span>
             <span className={`font-display text-sm font-bold ${side === "buy" ? "text-emerald-400" : "text-rose-400"}`}>
-              {side === "buy" ? "COMPRA ↑" : "VENDA ↓"}
+              {side === "buy" ? t.buyBig : t.sellBig}
             </span>
           </motion.div>
         )}
@@ -355,6 +376,7 @@ function Analyzing({ side }: { side: Side }) {
 }
 
 function Operating({ side }: { side: Side }) {
+  const { t, money } = useI18n();
   const [pnl, setPnl] = useState(0);
   const [elapsed, setElapsed] = useState(0);
 
@@ -376,16 +398,16 @@ function Operating({ side }: { side: Side }) {
     <motion.div {...panel} className="rounded-2xl border border-apollo-cyan/15 bg-apollo-panel/60 p-4">
       <div className="flex items-center justify-between">
         <div>
-          <p className="font-display text-sm font-semibold text-white">Operação em andamento…</p>
+          <p className="font-display text-sm font-semibold text-white">{t.operatingTitle}</p>
           <p className="mt-0.5 text-[11px] text-white/40">
-            {side === "buy" ? "Compra ↑" : "Venda ↓"} · entrada {brl(SIM.startBalance)}
+            {side === "buy" ? t.buySmall : t.sellSmall} · {t.entry} {money(SIM.startBalance)}
           </p>
         </div>
         <span className="font-display text-sm tabular-nums text-white/60">00:0{secondsLeft}</span>
       </div>
       <div className="mt-4 flex items-end justify-between">
-        <span className="text-[11px] uppercase tracking-widest text-white/40">Resultado parcial</span>
-        <span className="font-display text-xl font-bold tabular-nums text-emerald-400">+{brl(pnl)}</span>
+        <span className="text-[11px] uppercase tracking-widest text-white/40">{t.partial}</span>
+        <span className="font-display text-xl font-bold tabular-nums text-emerald-400">+{money(pnl)}</span>
       </div>
       <div className="mt-3 h-1 overflow-hidden rounded-full bg-white/10">
         <motion.div
@@ -400,23 +422,24 @@ function Operating({ side }: { side: Side }) {
 }
 
 function Result({ onSkip }: { onSkip: () => void }) {
+  const { t, money } = useI18n();
   return (
     <motion.div {...panel} className="rounded-2xl border border-emerald-400/20 bg-emerald-400/[0.04] p-5 text-center">
-      <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/50">Operação finalizada · simulação</p>
+      <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/50">{t.resultTitle}</p>
       <motion.p
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 0.15, type: "spring", stiffness: 260, damping: 18 }}
         className="mt-2 font-display text-4xl font-black text-emerald-400 drop-shadow-[0_0_24px_rgba(16,185,129,0.45)]"
       >
-        +{brl(PROFIT)}
+        +{money(PROFIT)}
       </motion.p>
       <p className="mt-3 text-sm text-white/60">
-        Saldo: <span className="text-white/80">{brl(SIM.startBalance)}</span> →{" "}
-        <span className="font-semibold text-emerald-400">{brl(FINAL_BALANCE)}</span>
+        {t.resultBalance} <span className="text-white/80">{money(SIM.startBalance)}</span> →{" "}
+        <span className="font-semibold text-emerald-400">{money(FINAL_BALANCE)}</span>
       </p>
-      <button onClick={onSkip} className="mt-4 text-xs font-semibold uppercase tracking-widest text-apollo-cyan">
-        Continuar →
+      <button onClick={onSkip} data-funil="botao_continuar" className="mt-4 text-xs font-semibold uppercase tracking-widest text-apollo-cyan">
+        {t.continue}
       </button>
       <div className="mt-3 h-0.5 overflow-hidden rounded-full bg-white/5">
         <motion.div
@@ -456,10 +479,9 @@ function useLicenseDeadline() {
 }
 
 function Unlocked() {
+  const { lang, t, money } = useI18n();
   const deadline = useLicenseDeadline();
-  const title = FREE_LICENSES
-    ? `${FREE_LICENSES} licenças gratuitas da Apollo IA`
-    : "Licença gratuita da Apollo IA";
+  const title = t.licenseTitle(FREE_LICENSES);
 
   return (
     <motion.section {...panel} className="mt-8 flex flex-1 flex-col items-center text-center">
@@ -482,10 +504,10 @@ function Unlocked() {
         </svg>
       </motion.div>
 
-      <p className="mt-6 text-xs font-bold uppercase tracking-[0.3em] text-apollo-cyan">Benefício desbloqueado</p>
+      <p className="mt-6 text-xs font-bold uppercase tracking-[0.3em] text-apollo-cyan">{t.unlocked}</p>
       <h1 className="mt-3 font-display text-2xl font-black uppercase leading-tight text-white neon-text">{title}</h1>
       <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/70">
-        Você concluiu sua primeira operação e desbloqueou uma licença gratuita da Apollo IA.
+        {t.licenseText}
       </p>
 
       {deadline && (
@@ -495,20 +517,21 @@ function Unlocked() {
       )}
 
       <a
-        href={TELEGRAM_URL}
+        href={TELEGRAM_URLS[lang]}
         target="_blank"
         rel="noopener noreferrer"
         onClick={() => track("TelegramClicked")}
+        data-funil="botao_telegram"
         className="group relative mt-8 flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl border border-apollo-cyan/40 bg-gradient-to-r from-apollo-blue to-apollo-cyan px-5 py-4 font-display text-sm font-bold uppercase tracking-wider text-white btn-glow transition active:scale-95"
       >
         <svg viewBox="0 0 24 24" className="h-5 w-5 flex-shrink-0 fill-current" aria-hidden="true">
           <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295-.002 0-.003 0-.005 0l.213-3.054 5.56-5.022c.24-.213-.054-.334-.373-.121l-6.869 4.326-2.96-.924c-.64-.203-.658-.643.135-.953l11.566-4.458c.538-.196 1.006.128.832.939z" />
         </svg>
-        <span>Receber minha licença gratuita</span>
+        <span>{t.cta}</span>
       </a>
 
       <p className="mt-4 text-[11px] text-white/40">
-        Sua comissão: <span className="text-emerald-400/80">+{brl(PROFIT)}</span>
+        {t.commission} <span className="text-emerald-400/80">+{money(PROFIT)}</span>
       </p>
     </motion.section>
   );

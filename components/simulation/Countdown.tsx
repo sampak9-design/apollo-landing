@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useI18n } from "@/lib/i18n";
 
 // Conta até o prazo recebido. Quem define o prazo é useLicenseDeadline.
 export default function Countdown({ deadline }: { deadline: number }) {
+  const { t } = useI18n();
   const [now, setNow] = useState<number | null>(null);
 
   useEffect(() => {
@@ -17,7 +19,7 @@ export default function Countdown({ deadline }: { deadline: number }) {
   if (remaining === 0) {
     return (
       <p className="text-center text-xs uppercase tracking-widest text-white/50">
-        Prazo desta liberação encerrado
+        {t.expired}
       </p>
     );
   }
@@ -25,16 +27,16 @@ export default function Countdown({ deadline }: { deadline: number }) {
   const total = Math.floor((remaining ?? 0) / 1000);
   const days = Math.floor(total / 86400);
   const units: [string, number][] = [
-    ...(days > 0 ? [["dias", days] as [string, number]] : []),
-    ["horas", Math.floor((total % 86400) / 3600)],
-    ["min", Math.floor((total % 3600) / 60)],
-    ["seg", total % 60],
+    ...(days > 0 ? [[t.units.days, days] as [string, number]] : []),
+    [t.units.hours, Math.floor((total % 86400) / 3600)],
+    [t.units.min, Math.floor((total % 3600) / 60)],
+    [t.units.sec, total % 60],
   ];
 
   return (
     <div className="flex flex-col items-center gap-2">
       <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/50">
-        Disponível por
+        {t.availableFor}
       </span>
       <div className="flex items-start gap-1.5 font-display" suppressHydrationWarning>
         {units.map(([label, value], i) => (
