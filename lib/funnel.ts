@@ -14,7 +14,7 @@ type FunnelEvent = {
 };
 
 const FALLBACK_ENDPOINT = "https://track-production-cd03.up.railway.app/tracker/funil";
-const HEARTBEAT_MS = 15_000;
+const HEARTBEAT_MS = 30_000;
 const DEBOUNCE_MS = 2_000;
 
 let started = false;
@@ -187,8 +187,6 @@ function aoMudarVisibilidade() {
 
 /** Inicia o funil uma vez por carregamento de página. */
 export function startFunnel(idioma: string) {
-  // Desligado até confirmar que o banco do Tracker aguenta: ligar com NEXT_PUBLIC_FUNIL_ON=1
-  if (process.env.NEXT_PUBLIC_FUNIL_ON !== "1") return;
   if (started || typeof window === "undefined") return;
   started = true;
   lang = idioma;
