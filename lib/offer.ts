@@ -4,11 +4,10 @@
 
 const TELEGRAM_URL = "https://t.me/+vWYX93dvUA5hYjgx";
 
-// Link do Telegram por idioma. Sem NEXT_PUBLIC_TELEGRAM_URL_ES, o México
-// usa o mesmo canal.
+// Link do Telegram por idioma (NEXT_PUBLIC_TELEGRAM_URL_ES sobrescreve o do México)
 export const TELEGRAM_URLS = {
   pt: TELEGRAM_URL,
-  es: process.env.NEXT_PUBLIC_TELEGRAM_URL_ES || TELEGRAM_URL,
+  es: process.env.NEXT_PUBLIC_TELEGRAM_URL_ES || "https://t.me/apollomx",
 };
 
 const licenses = Number(process.env.NEXT_PUBLIC_FREE_LICENSES);
